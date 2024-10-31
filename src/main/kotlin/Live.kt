@@ -9,7 +9,13 @@ import org.lwjgl.system.MemoryUtil.NULL
 import java.lang.Thread.sleep
 
 
+
 class Live(private var window: Long = 0) {
+
+    private var cameraX = 0f
+    private var cameraY = 0f
+    private var zoom = 1f
+    private val cellSize = 10.0
 
     fun run(){
         init()
@@ -52,18 +58,66 @@ class Live(private var window: Long = 0) {
         GL.createCapabilities()
 
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
-        glOrtho(0.0, 40.0, 40.0, 0.0, -1.0, 1.0)
-        val grid = Array(40) { Array(40) { false } }
+        glOrtho(0.0, 80.0, 80.0, 0.0, -1.0, 1.0)
+        var grid = Array(80) { Array(80) { false } }
 
-        while(!glfwWindowShouldClose(window)){
+        grid[5][5] = true
+        grid[5][7] = true
+        grid[4][6] = true
+        grid[6][6] = true
+
+        grid[3][5] = true
+        grid[3][7] = true
+
+        grid[3][5] = true
+        grid[3][7] = true
+
+        var isPlay = true
+
+        while(!glfwWindowShouldClose(window)) {
+
             glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
 
             drawGrid(grid)
-            // grid = nextGeneration(grid)
-            sleep(200)
+
+            if (isPlay){
+                grid = nextGeneration(grid)
+                sleep(100)
+            }
+
+            sleep(20)
 
             glfwSwapBuffers(window)
             glfwPollEvents()
+
+
+            glfwSetKeyCallback(window) { window, key, scancode, action, mods  ->
+                if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE)
+                    isPlay = !isPlay
+            }
+
+            glfwSetMouseButtonCallback(window) { _, button, action, _ ->
+                if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+                    val xpos = DoubleArray(1)
+                    val ypos = DoubleArray(1)
+                    glfwGetCursorPos(window, xpos, ypos)
+                    val mouseX = (xpos[0] / zoom + cameraX).toFloat()
+                    val mouseY = (ypos[0] / zoom + cameraY).toFloat()
+
+                    println("${xpos[0]} ${ypos[0]}")
+
+                    val gridX = (mouseX / cellSize).toInt()
+                    val gridY = (mouseY / cellSize).toInt()
+
+                    println("${mouseX} / ${cellSize} = ${gridX}   ${mouseY} / ${cellSize} = ${gridY}")
+
+                    if (gridX in grid.indices && gridY in grid[0].indices) {
+                        grid[gridX][gridY] = !grid[gridX][gridY]
+                    }
+                }
+            }
+
+
         }
     }
 
@@ -71,9 +125,9 @@ class Live(private var window: Long = 0) {
         for (x in grid.indices){
             for (y in grid[x].indices){
                 glColor3f(
-                    0f,
-                    if (grid[x][y]) 1.0f else 0f,
-                    0f
+                    if (grid[x][y]) 0.1f else 0f,
+                    if (grid[x][y]) 0.9f else 0f,
+                    if (grid[x][y]) 0.1f else 0f
                 )
                 glBegin(GL_QUADS)
                 glVertex2f(x.toFloat(), y.toFloat())
