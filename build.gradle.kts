@@ -6,7 +6,7 @@ group = "org.example"
 version = "1.0-SNAPSHOT"
 
 val lwjglVersion = "3.3.4"
-val lwjglNatives = "natives-windows"
+val lwjglNatives = "natives-linux"
 
 repositories {
     mavenCentral()
