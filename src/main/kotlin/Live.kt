@@ -131,8 +131,6 @@ class Live(private var window: Long = 0) {
 
             glfwSwapBuffers(window)
             glfwPollEvents()
-
-
         }
     }
 
